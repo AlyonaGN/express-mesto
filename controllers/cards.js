@@ -1,5 +1,7 @@
-const readFile = require('../utils/read-func.js');
 const path = require('path');
+
+const readFile = require('../utils/read-func.js');
+
 const jsonCardsPath = path.join(__dirname, '..', 'data', 'cards.json');
 
 const getCards = (req, res) => {
@@ -9,6 +11,7 @@ const getCards = (req, res) => {
     })
     .catch((error) => {
       console.log(error);
+      res.status(500).send({ message: 'Не удалось прочитать файл :(' });
     });
 };
 

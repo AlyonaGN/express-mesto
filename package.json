@@ -1,7 +1,7 @@
 {
   "name": "veryfirstback",
   "version": "1.0.0",
-  "description": "",
+  "description": "back of mesto project",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -10,13 +10,12 @@
   "author": "AlyonaG",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^7.10.0",
-    "eslint-plugin-react": "^7.21.3",
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
     "nodemon": "^2.0.4"
   },
   "dependencies": {
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.1"
   }
 }
