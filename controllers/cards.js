@@ -1,18 +1,48 @@
-const path = require('path');
+const Card = require('../models/card');
 
-const readFile = require('../utils/read-func.js');
-
-const jsonCardsPath = path.join(__dirname, '..', 'data', 'cards.json');
-
-const getCards = (req, res) => {
-  readFile(jsonCardsPath)
-    .then((cards) => {
-      res.send(cards);
+const createCard = (req, res) => {
+  const { name, link } = req.body;
+  Card.create({ name, link })
+    .then((newCard) => {
+      res.send({ data: newCard });
     })
     .catch((error) => {
-      console.log(error);
-      res.status(500).send({ message: 'Не удалось прочитать файл :(' });
+      const ERROR_CODE = 400;
+      if (error.name === 'ErrorName') {
+        return res.status(ERROR_CODE).send({ message: 'Не удалось создать карточку :(' });
+      }
     });
 };
 
-module.exports = getCards;
+const getCards = (req, res) => {
+  Card.find({})
+    .then((cards) => {
+      res.send({ data: cards });
+    })
+    .catch((error) => {
+      const ERROR_CODE = 500;
+      if (error.name === 'ErrorName') {
+        return res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
+      }
+    });
+};
+
+const deleteCard = (req, res) => {
+  const { id } = req.params;
+  Card.findByIdAndRemove(id)
+    .then((card) => {
+      res.send({ data: card });
+    })
+    .catch((error) => {
+      const ERROR_CODE = 404;
+      if (error.name === 'ErrorName') {
+        return res.status(ERROR_CODE).send({ message: 'Не удалось найти карточку :(' });
+      }
+    });
+};
+
+module.exports = {
+  createCard,
+  getCards,
+  deleteCard,
+};
