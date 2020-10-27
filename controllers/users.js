@@ -8,7 +8,7 @@ const getUsers = (req, res) => {
     .catch((error) => {
       const ERROR_CODE = 500;
       if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
+        res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
       }
     });
 };
@@ -40,23 +40,7 @@ const createUser = (req, res) => {
     .catch((error) => {
       const ERROR_CODE = 400;
       if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Не удалось создать пользователя, попробуйте ещё раз' });
-      }
-    });
-};
-
-const updateProfile = (req, res) => {
-  const id = req.user._id;
-  User.findByIdAndUpdate(id, { name: `f${((Math.random() * 1e8)).toString(16)}` }, {
-    new: true,
-    runValidators: true,
-    upsert: true,
-  })
-    .then((user) => res.send({ data: user }))
-    .catch((error) => {
-      const ERROR_CODE = 400;
-      if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Не удалось обновить профиль, попробуйте ещё раз' });
+        res.status(ERROR_CODE).send({ message: 'Не удалось создать пользователя, попробуйте ещё раз' });
       }
     });
 };
@@ -65,5 +49,4 @@ module.exports = {
   getUsers,
   getUser,
   createUser,
-  updateProfile,
 };

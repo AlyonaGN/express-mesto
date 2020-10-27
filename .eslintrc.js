@@ -3,6 +3,5 @@ module.exports = {
   ignorePatterns: ['node_modules', 'public'],
   rules: {
     'no-underscore-dangle': [2, { allow: ['_id'] }],
-    'consistent-return': 0,
   },
 };

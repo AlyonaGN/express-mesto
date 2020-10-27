@@ -9,7 +9,7 @@ const createCard = (req, res) => {
     .catch((error) => {
       const ERROR_CODE = 400;
       if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Не удалось создать карточку :(' });
+        res.status(ERROR_CODE).send({ message: 'Не удалось создать карточку :(' });
       }
     });
 };
@@ -22,7 +22,7 @@ const getCards = (req, res) => {
     .catch((error) => {
       const ERROR_CODE = 500;
       if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
+        res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
       }
     });
 };
@@ -35,7 +35,6 @@ const deleteCard = (req, res) => {
       res.send({ data: card });
     })
     .catch((error) => {
-      console.log(error.message);
       if (error.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else if (error.message === 'NotFound') {
