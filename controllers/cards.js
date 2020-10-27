@@ -30,13 +30,18 @@ const getCards = (req, res) => {
 const deleteCard = (req, res) => {
   const { id } = req.params;
   Card.findByIdAndRemove(id)
+    .orFail(new Error('NotFound'))
     .then((card) => {
       res.send({ data: card });
     })
     .catch((error) => {
-      const ERROR_CODE = 404;
-      if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Не удалось найти карточку :(' });
+      console.log(error.message);
+      if (error.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (error.message === 'NotFound') {
+        res.status(404).send({ message: 'Не удалось найти и удалить карточку' });
+      } else {
+        res.status(500).send({ message: 'Произошло какое-то удивительное недоразумение' });
       }
     });
 };

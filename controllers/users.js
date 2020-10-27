@@ -16,16 +16,17 @@ const getUsers = (req, res) => {
 const getUser = (req, res) => {
   const { id } = req.params;
   User.findById(id)
+    .orFail(new Error('NotFound'))
     .then((userData) => {
-      if (!userData) {
-        return res.status(404).send({ message: 'Нет пользователя с таким id' });
-      }
       res.send({ data: userData });
     })
     .catch((error) => {
-      const ERROR_CODE = 404;
-      if (error.name === 'ErrorName') {
-        return res.status(ERROR_CODE).send({ message: 'Не удалось найти пользователя :(' });
+      if (error.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else if (error.message === 'NotFound') {
+        res.status(404).send({ message: 'Объект не найден' });
+      } else {
+        res.status(500).send({ message: 'Что-то пошло не так' });
       }
     });
 };
