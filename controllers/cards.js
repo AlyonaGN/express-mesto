@@ -7,9 +7,10 @@ const createCard = (req, res) => {
       res.send({ data: newCard });
     })
     .catch((error) => {
-      const ERROR_CODE = 400;
-      if (error.name === 'ErrorName') {
-        res.status(ERROR_CODE).send({ message: 'Не удалось создать карточку :(' });
+      if (error.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
+      } else {
+        res.status(500).send({ message: 'Произошло какое-то удивительное недоразумение' });
       }
     });
 };
@@ -19,11 +20,9 @@ const getCards = (req, res) => {
     .then((cards) => {
       res.send({ data: cards });
     })
-    .catch((error) => {
+    .catch(() => {
       const ERROR_CODE = 500;
-      if (error.name === 'ErrorName') {
-        res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
-      }
+      res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
     });
 };
 
