@@ -6,21 +6,26 @@ const app = express();
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/users.js');
 const cardsRoutes = require('./routes/cards.js');
+const {
+  login,
+  createUser,
+} = require('./controllers/users.js');
+const auth = require('./middlewares/auth.js');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
+  useUnifiedTopology: true,
 });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5f957cb8592a2157d0595aff',
-  };
-  next();
-});
+
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+app.use(auth);
 app.use('/', userRoutes);
 app.use('/', cardsRoutes);
 app.use((req, res) => {
