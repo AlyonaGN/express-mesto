@@ -1,19 +1,19 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found-err');
+const IncorrectInputError = require('../errors/incorrect-input-err');
+const UnauthorizedError = require('../errors/unauthoriszed-err');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((usersData) => {
       res.send({ data: usersData });
     })
-    .catch(() => {
-      const ERROR_CODE = 500;
-      res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
-    });
+    .catch(next);
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   const { id } = req.params;
   User.findById(id)
     .orFail(new Error('NotFound'))
@@ -22,16 +22,15 @@ const getUser = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        throw new IncorrectInputError('Переданы некорректные данные');
       } else if (error.message === 'NotFound') {
-        res.status(404).send({ message: 'Объект не найден' });
-      } else {
-        res.status(500).send({ message: 'Что-то пошло не так' });
+        throw new NotFoundError('Объект не найден');
       }
-    });
+    })
+    .catch(next);
 };
 
-const getMyUser = (req, res) => {
+const getMyUser = (req, res, next) => {
   const id = req.user._id;
   User.findById(id)
     .orFail(new Error('NotFound'))
@@ -40,16 +39,15 @@ const getMyUser = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        throw new IncorrectInputError('Переданы некорректные данные');
       } else if (error.message === 'NotFound') {
-        res.status(404).send({ message: 'Объект не найден' });
-      } else {
-        res.status(500).send({ message: 'Что-то пошло не так' });
+        throw new NotFoundError('Объект не найден');
       }
-    });
+    })
+    .catch(next);
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -64,14 +62,13 @@ const createUser = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'Произошло какое-то удивительное недоразумение' });
+        throw new IncorrectInputError('Переданы некорректные данные');
       }
-    });
+    })
+    .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -79,10 +76,9 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+      throw new UnauthorizedError(err.message);
+    })
+    .catch(next);
 };
 
 module.exports = {

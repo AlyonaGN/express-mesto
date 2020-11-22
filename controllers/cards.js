@@ -1,6 +1,9 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-err');
+const IncorrectInputError = require('../errors/incorrect-input-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
@@ -9,53 +12,55 @@ const createCard = (req, res) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'Произошло какое-то удивительное недоразумение' });
+        throw new IncorrectInputError('Переданы некорректные данные');
       }
-    });
+    })
+    .catch(next);
 };
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
       res.send({ data: cards });
     })
-    .catch(() => {
-      const ERROR_CODE = 500;
-      res.status(ERROR_CODE).send({ message: 'Мне очень жаль, но что-то пошло не так' });
-    });
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { id } = req.params;
   Card.findById(id)
-    .orFail(new Error('NotFound'))
     .then((card) => {
+      console.log(card);
       if (req.user._id !== card.owner) {
-        return res.status(403).send({ message: 'Невозможно удалить карточку другого пользователя' });
+        throw new ForbiddenError('Невозможно удалить карточку другого пользователя');
       }
 
-      return Card.deleteOne({ _id: id })
-        .then((deletedCard) => res.send({ data: deletedCard }))
+      Card.deleteOne({ _id: id })
+        .orFail(new Error('NotFound'))
+        .then((deletedCard) => {
+          return res.send({ data: deletedCard });
+        })
         .catch((error) => {
           if (error.name === 'CastError') {
-            res.status(400).send({ message: 'Переданы некорректные данные' });
+            throw new IncorrectInputError('Переданы некорректные данные');
           } else if (error.message === 'NotFound') {
-            res.status(404).send({ message: 'Не удалось найти и удалить карточку' });
-          } else {
-            res.status(500).send({ message: 'Произошло какое-то удивительное недоразумение' });
+            throw new NotFoundError('Не удалось найти и удалить карточку');
           }
+        })
+        .catch((err) => {
+          next(err);
         });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
+        throw new IncorrectInputError('Переданы некорректные данные');
       } else if (error.message === 'NotFound') {
-        res.status(404).send({ message: 'Не удалось найти и удалить карточку' });
-      } else {
-        res.status(500).send({ message: 'Произошло какое-то удивительное недоразумение' });
+        throw new NotFoundError('Не удалось найти и удалить карточку');
       }
+      throw error;
+    })
+    .catch((err) => {
+      next(err);
     });
 };
 
