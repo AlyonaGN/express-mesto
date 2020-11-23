@@ -14,8 +14,11 @@ const createCard = (req, res, next) => {
       if (error.name === 'ValidationError') {
         throw new IncorrectInputError('Переданы некорректные данные');
       }
+      throw error;
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const getCards = (req, res, next) => {
@@ -23,29 +26,29 @@ const getCards = (req, res, next) => {
     .then((cards) => {
       res.send({ data: cards });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const deleteCard = (req, res, next) => {
   const { id } = req.params;
   Card.findById(id)
     .then((card) => {
-      console.log(card);
       if (req.user._id !== card.owner) {
         throw new ForbiddenError('Невозможно удалить карточку другого пользователя');
       }
 
       Card.deleteOne({ _id: id })
         .orFail(new Error('NotFound'))
-        .then((deletedCard) => {
-          return res.send({ data: deletedCard });
-        })
+        .then((deletedCard) => res.send({ data: deletedCard }))
         .catch((error) => {
           if (error.name === 'CastError') {
             throw new IncorrectInputError('Переданы некорректные данные');
           } else if (error.message === 'NotFound') {
             throw new NotFoundError('Не удалось найти и удалить карточку');
           }
+          throw error;
         })
         .catch((err) => {
           next(err);

@@ -26,6 +26,7 @@ const getUser = (req, res, next) => {
       } else if (error.message === 'NotFound') {
         throw new NotFoundError('Объект не найден');
       }
+      throw error;
     })
     .catch(next);
 };
@@ -43,6 +44,7 @@ const getMyUser = (req, res, next) => {
       } else if (error.message === 'NotFound') {
         throw new NotFoundError('Объект не найден');
       }
+      throw error;
     })
     .catch(next);
 };
@@ -64,6 +66,7 @@ const createUser = (req, res, next) => {
       if (error.name === 'ValidationError') {
         throw new IncorrectInputError('Переданы некорректные данные');
       }
+      throw error;
     })
     .catch(next);
 };
