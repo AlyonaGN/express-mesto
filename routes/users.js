@@ -1,21 +1,14 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+
 const {
   getUsers,
   getUser,
   getMyUser,
 } = require('../controllers/users.js');
+const { validateMongooseId } = require('../middlewares/validate.js');
 
 router.get('/users', getUsers);
-router.get('/users/me', celebrate({
-  headers: Joi.object().keys({
-    authorization: Joi.string().required(),
-  }).unknown(true),
-}), getMyUser);
-router.get('/users/:id', celebrate({
-  headers: Joi.object().keys({
-    authorization: Joi.string().required(),
-  }).unknown(true),
-}), getUser);
+router.get('/users/me', getMyUser);
+router.get('/users/:id', validateMongooseId, getUser);
 
 module.exports = router;

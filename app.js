@@ -1,12 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 const mongoose = require('mongoose');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { validateSignupBody, validateSigninBody } = require('./middlewares/validate.js');
 
 const userRoutes = require('./routes/users.js');
 const cardsRoutes = require('./routes/cards.js');
@@ -29,21 +29,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required(),
-    password: Joi.string().required().min(5),
-  }),
-}), login);
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
-    email: Joi.string().unique(),
-    password: Joi.string().required().min(5),
-  }),
-}), createUser);
+app.post('/signin', validateSigninBody, login);
+app.post('/signup', validateSignupBody, createUser);
 
 app.use(auth);
 app.use('/', userRoutes);
@@ -65,6 +52,7 @@ app.use((err, req, res, next) => {
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {
